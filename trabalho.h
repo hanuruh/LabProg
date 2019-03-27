@@ -1,3 +1,5 @@
+#define HASH_SIZE 20
+
 typedef struct{
      ElemKind kind;
 		union{ 
@@ -24,11 +26,28 @@ Elem mkVar(char *s);
 Elem mkInt(int n);
 Elem empty();
 Instr mkInstr(Opkind op, Elem x, Elem y, Elem z); //exemplo k = (mkInstr(ADD,mkVar("x"),mkVar("y"),mkInt(2)); y = x + 2 . k vai representar e memoria a instrução
-PROG_LIST newList(Instr head, PROG_LIST head);
+PROG_LIST mkList(Instr head, PROG_LIST tail);
 
 int getValue(Elem x);
+char* getString(Elem x);
 void escrever(Instr intruc);
 
-//a função run é basucamente um switch
-//primeiro testar os construtores
-//depois fazer cena de passar ficheiro para lista, função strtoken ver
+/*******************HASHTABLE**********************/
+typedef struct list{
+	char *chave;	
+	int elem;
+	struct list *next;
+}*PROG_CELL;
+
+unsigned int hash(char *s);
+
+PROG_CELL table[HASH_SIZE];
+
+PROG_CELL lookup(char *s);
+
+void insert(char *s, int value);
+void init_table();
+void PrintCell(PROG_CELL c);
+int getValofCell(PROG_CELL p);
+/*******************HASHTABLE**********************/
+
