@@ -6,6 +6,22 @@
 //a função run começa a reading do ficheiro
 //primeiro testar os construtores
 //depois fazer cena de passar ficheiro para lista, função strtoken ver
+/*
+Inserção dum valor para uma variável: para que o utilizador possa indicar um valor para a variável
+identificada pela string referida na instrução. Caso a variável já tenha valor,
+ esse valor será substituído pelo novo.
+ler(<variável>);
+*/
+/*
+ Atribuir o valor duma expressão a uma variável: todas as variáveis que ocorram na expressão deverão
+ ter já um valor definido; o valor da expressão será atribuído à variável que se encontra 
+ do lado esquerdo.
+<variável> = <expressão>;
+*/
+//instruções goto: goto label
+//Comandos condicionais da forma: if <variável> goto <label>
+//Terminar a execução do programa: quit;
+
 
 /*******************HASHTABLE**********************/
 //Problema: insert ajuda em x = 2 pq recebe char & int, mas para x = y??
@@ -56,7 +72,37 @@ void init_table(){
 int getValofCell(PROG_CELL p){
 	return p->elem;
 }
+
+char* getNameofCell(PROG_CELL p){
+	return p->chave;
+}
 /*******************HASHTABLE**********************/
+
+/*******************LIST**********************/
+PROG_LIST mkList(Instr head, PROG_LIST tail_l){
+	PROG_LIST new;
+	new.elem = head;
+	new.next = tail_l;
+	return new;
+}
+
+PROG_LIST append(PROG_LIST l1, PROG_LIST l2){
+	PROG_LIST new = l1;
+	if(l1 == NULL) return l2;
+	else{
+		while( l1 -> next != NULL)
+			l1 = l1 -> next;
+		l1 -> next = l2;
+	}
+	return new;	
+}
+
+PROG_LIST addLast(Instr n, PROG_LIST l1){
+	PROG_LIST l2 = newList(n,NULL);
+	PROG_LIST new = append(l1,l2);	
+	return new;
+}
+/*******************LIST**********************/
 
 //PROG 
 Elem mkVar(char * s){
@@ -79,19 +125,12 @@ Elem empty(){
 	return new;
 }
 
-Instr mkInstr(Opkind oper, Elem x, Elem y, Elem z){
+Instr mkInstr(OpKind oper, Elem x, Elem y, Elem z){
 	Instr new;
 	new.op = oper;
 	new.first = x;
 	new.second = y;
 	new.third = z;
-	return new;
-}
-
-PROG_LIST newList(Instr head, PROG_LIST tail_l){
-	PROG_LIST new;
-	new.elem = head;
-	new.next = tail_l;
 	return new;
 }
 
@@ -109,23 +148,27 @@ char* getName(Elem x){
 void printInstruc(Instr instruc){
 	switch(instruc.first.kind){
 		case INT_CONST:
-			printf("%d\n", getVal(instruc.first); break;
-		case STRING
-			printf("%s\n", getName(instruc.first); break;
+			printf("%d\n", getValue(instruc.first)); break;
+		case STRING:
+			printf("%s\n", getName(instruc.first)); break;
+		default: printf("Erro de Impressão\n");
 	}	
 }
 
-void escrever(Instr instruc){
-	PROG_CELL C1;
+void escrever(Instr inst){
+	//células que contêm valores de x e respetivo value (se existir)
+	//C1 = lookup(x) C1 vai ter a célula de x
+	//C1->elem delvolve valor de x (se existir)
+	PROG_CELL C1; 
 	PROG_CELL C2;
 	init_table(); //não sei muito bem onde pôr isto tbh
-	switch(instruc.op){
+	switch(inst.op){
 		case PRINT:
-			printInstrc(instruc);		
+			printInstruc(inst);		
 		case ATRIB:
 			if (inst.second.kind == INT_CONST) {
-				printf("%s = %d\n", getName(inst.first), getVal(inst.second));
-				insert(inst.first,inst.second);
+				printf("%s = %d\n", getName(inst.first), getValue(inst.second));
+				insert(getName(inst.first),getValue(inst.second));
 			} else if (inst.second.kind == STRING) {
 				printf("%s = %s\n", getName(inst.first), getName(inst.second));
 				//insert(inst.first,inst.second); não vai dar por insert tipo char & int, não char & char
@@ -133,69 +176,93 @@ void escrever(Instr instruc){
 				break;
 		case ADD:
 			if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-				printf("%d\n",( getVal(inst.second) + getVal(inst.third) ));
+				printf("%d\n",( getValue(inst.second) + getValue(inst.third) ));
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == STRING) {
-				C1 = lookup(inst.second);
-				C2 = lookup(inst.third);
+				C1 = lookup(getName(inst.second));
+				C2 = lookup(getName(inst.third));
 				printf("%d\n",( getValofCell(C1) + getValofCell(C2))); 
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-				C1 = lookup(inst.second);
-				printf("%d\n", ( getValofCell(C1) +  getVal(inst.third));
+				C1 = lookup(getName(inst.second));
+				printf("%d\n", ( getValofCell(C1) +  getValue(inst.third)));
 				break;
 			}
 			if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-				C1 = lookup(inst.third);
-				printf("%d\n", ( getValofCell(C1) +  getVal(inst.second));
+				C1 = lookup(getName(inst.third));
+				printf("%d\n", ( getValofCell(C1) +  getValue(inst.second)));
 				break;
 			}
 				break;
 		case SUB:
 			if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-				printf("%d\n",( getVal(inst.second) - getVal(inst.third) ));
+				printf("%d\n",( getValue(inst.second) - getValue(inst.third) ));
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == STRING) {
-				C1 = lookup(inst.second);
-				C2 = lookup(inst.third);
+				C1 = lookup(getName(inst.second));
+				C2 = lookup(getName(inst.third));
 				printf("%d\n",( getValofCell(C1) - getValofCell(C2)));
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-				C1 = lookup(inst.second);
-				printf("%d\n", ( getValofCell(C1) -  getVal(inst.third));
+				C1 = lookup(getName(inst.second));
+				printf("%d\n", ( getValofCell(C1) -  getValue(inst.third)));
 				break;
 			}
 			if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-				C1 = lookup(inst.third);
-				printf("%d\n", ( getValofCell(C1) -  getVal(inst.second));
+				C1 = lookup(getName(inst.third));
+				printf("%d\n", ( getValofCell(C1) -  getValue(inst.second)));
 				break;
 			}
 				break;
 		case MUL:
 			if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-				printf("%d\n",( getVal(inst.second) * getVal(inst.third) ));
+				printf("%d\n",( getValue(inst.second) * getValue(inst.third) ));
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == STRING) {
-				C1 = lookup(inst.second);
-				C2 = lookup(inst.third);
+				C1 = lookup(getName(inst.second));
+				C2 = lookup(getName(inst.third));
 				printf("%d\n",( getValofCell(C1) * getValofCell(C2)));
 				break;
 			}
 			if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-				C1 = lookup(inst.second);
-				printf("%d\n", ( getValofCell(C1) *  getVal(inst.third));
+				C1 = lookup(getName(inst.second));
+				printf("%d\n", ( getValofCell(C1) *  getValue(inst.third)));
 				break;
 			}
 			if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-				C1 = lookup(inst.third);
-				printf("%d\n", ( getValofCell(C1) *  getVal(inst.second));
+				C1 = lookup(getName(inst.third));
+				printf("%d\n", ( getValofCell(C1) *  getValue(inst.second)));
 				break;
 			}
+				break;
+		case DIV:
+			if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
+				printf("%d\n",( getValue(inst.second) / getValue(inst.third) ));
+				break;
+			}
+			if (inst.second.kind == STRING && inst.third.kind == STRING) {
+				C1 = lookup(getName(inst.second));
+				C2 = lookup(getName(inst.third));
+				printf("%d\n",( getValofCell(C1) / getValofCell(C2)));
+				break;
+			}
+			if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
+				C1 = lookup(getName(inst.second));
+				printf("%d\n", ( getValofCell(C1) /  getValue(inst.third)));
+				break;
+			}
+			if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
+				C1 = lookup(getName(inst.third));
+				printf("%d\n", ( getValofCell(C1) /  getValue(inst.second)));
+				break;
+			}
+		default: 
+			printf("Erro!!\n");
 	}
 }
 
@@ -203,7 +270,7 @@ void escreverDEBBUG(Instr inst) {
   switch (inst.op) {
     case ATRIB:
     if (inst.second.kind == INT_CONST) {
-      printf("%s = %d\n", getName(inst.first), getVal(inst.second));
+      printf("%s = %d\n", getName(inst.first), getValue(inst.second));
     } else if (inst.second.kind == STRING) {
       printf("%s = %s\n", getName(inst.first), getName(inst.second));
 
@@ -211,7 +278,7 @@ void escreverDEBBUG(Instr inst) {
     break;
     case ADD:
     if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-      printf("%s = %d + %d\n", getName(inst.first), getVal(inst.second), getVal(inst.third));
+      printf("%s = %d + %d\n", getName(inst.first), getValue(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == STRING) {
@@ -219,17 +286,17 @@ void escreverDEBBUG(Instr inst) {
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-      printf("%s = %s + %d\n", getName(inst.first), getName(inst.second), getVal(inst.third));
+      printf("%s = %s + %d\n", getName(inst.first), getName(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-      printf("%s = %d + %s\n", getName(inst.first), getVal(inst.second), getName(inst.third));
+      printf("%s = %d + %s\n", getName(inst.first), getValue(inst.second), getName(inst.third));
       break;
     }
     break;
     case SUB:
     if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-      printf("%s = %d - %d\n", getName(inst.first), getVal(inst.second), getVal(inst.third));
+      printf("%s = %d - %d\n", getName(inst.first), getValue(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == STRING) {
@@ -237,17 +304,17 @@ void escreverDEBBUG(Instr inst) {
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-      printf("%s = %s - %d\n", getName(inst.first), getName(inst.second), getVal(inst.third));
+      printf("%s = %s - %d\n", getName(inst.first), getName(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-      printf("%s = %d - %s\n", getName(inst.first), getVal(inst.second), getName(inst.third));
+      printf("%s = %d - %s\n", getName(inst.first), getValue(inst.second), getName(inst.third));
       break;
     }
     break;
     case MUL:
     if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-      printf("%s = %d * %d\n", getName(inst.first), getVal(inst.second), getVal(inst.third));
+      printf("%s = %d * %d\n", getName(inst.first), getValue(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == STRING) {
@@ -255,12 +322,15 @@ void escreverDEBBUG(Instr inst) {
       break;
     }
     if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-      printf("%s = %s * %d\n", getName(inst.first), getName(inst.second), getVal(inst.third));
+      printf("%s = %s * %d\n", getName(inst.first), getName(inst.second), getValue(inst.third));
       break;
     }
     if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-      printf("%s = %d * %s\n", getName(inst.first), getVal(inst.second), getName(inst.third));
+      printf("%s = %d * %s\n", getName(inst.first), getValue(inst.second), getName(inst.third));
       break;
     }
+    
+    default: 
+		printf("Erro!!\n");
   }
 }
