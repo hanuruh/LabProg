@@ -2,29 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-//a função run começa a reading do ficheiro
-//primeiro testar os construtores
-//depois fazer cena de passar ficheiro para lista, função strtoken ver
-/*
-Inserção dum valor para uma variável: para que o utilizador possa indicar um valor para a variável
-identificada pela string referida na instrução. Caso a variável já tenha valor,
- esse valor será substituído pelo novo.
-ler(<variável>);
-*/
-/*
- Atribuir o valor duma expressão a uma variável: todas as variáveis que ocorram na expressão deverão
- ter já um valor definido; o valor da expressão será atribuído à variável que se encontra 
- do lado esquerdo.
-<variável> = <expressão>;
-*/
-//instruções goto: goto label
-//Comandos condicionais da forma: if <variável> goto <label>
-//Terminar a execução do programa: quit;
-
+#include <ctype.h>
 
 /*******************HASHTABLE**********************/
-//Problema: insert ajuda em x = 2 pq recebe char & int, mas para x = y??
 unsigned int hash(char *s){
 		
 unsigned int h;
@@ -40,22 +20,24 @@ return h%HASH_SIZE;
 
 //obter valor de STRING
 PROG_CELL lookup(char *s){
-	int index;
-	PROG_CELL p;
-	index= hash(s);
-	for(p=table[index];p!=NULL;p=p->next){
-		if(strcmp(s,p->chave)==0)
-			return p;
-	}
-	return NULL;
+	int index = hash(s);
+  while (table[index] != NULL) {
+    if (table[index]->chave) {
+      return table[index];
+    }
+    index ++;
+    index %= HASH_SIZE;
+  }
+  return NULL;
 }
 
 //inserir o valor de eg. x = INT_CONST
 void insert(char *s, int value){
+	printf("Insert");
 	int index;
 	index = hash(s);
 	PROG_CELL p;
-	p=(PROG_CELL)malloc(sizeof(struct list));
+	p=(PROG_CELL)malloc(sizeof(struct hash));
 	p->chave= s;
 	p->elem = value;
 	p->next = table[index];	
@@ -79,10 +61,10 @@ char* getNameofCell(PROG_CELL p){
 /*******************HASHTABLE**********************/
 
 /*******************LIST**********************/
-PROG_LIST mkList(Instr head, PROG_LIST tail_l){
-	PROG_LIST new;
-	new.elem = head;
-	new.next = tail_l;
+PROG_LIST newList(Instr head, PROG_LIST tail_l){
+	PROG_LIST new = malloc(sizeof(struct list));
+	new->elem = head;
+	new->next = tail_l;
 	return new;
 }
 
@@ -107,38 +89,7 @@ PROG_LIST tail(PROG_LIST l){
 	return(l->next);
 }
 
-PROG_LIST map(int (*f)(int),PROG_LIST l){
-	if(l==NULL) return NULL;
-	else{
-		int x = head(l);
-		PROG_LIST r = tail(l);
-		return newList(f(x),map(f,r));
-	}
-}
-
-PROG_LIST filter(Bool (*p)(int), PROG_LIST l){
-	if(l==NULL) return NULL;
-	else{
-		if(p(head(l)) == TRUE)
-			return newList(head(l), filter(p,tail(l)));
-		else
-			return filter(p,tail(l));
-	}
-}
-
-PROG_LIST readList(){
-	int n;
-	char c;
-	scanf("%d%c", &n, &c);
-	PROG_LIST new = newList(n,NULL);
-	while( c == ' '){
-		scanf("%d%c", &n, &c);	
-		addLast(n,new);	
-	}
-	return new;	
-}
-
-int head(PROG_LIST l){
+Instr head(PROG_LIST l){
 	if(l != NULL)
 		return(l -> elem);
 }
@@ -148,152 +99,24 @@ int length(PROG_LIST l){
 	else return(1 + length(tail(l)));
 }
 
-int elem_n(int n, PROG_LIST l){
-	int count=0;
-	while(count<n){
-		l=l->next;
-		count++;
-	}
-	return(l->elem);
+void printList(PROG_LIST l) {
+  while (l != NULL) {
+    escrever(head(l));
+    l = l->next;
+  }
 }
 
-void printList(PROG_LIST l){
-	printf("[ ");
-	while(l != NULL){
-	printf("%d ", l -> elem);
-	l = tail(l);	
-	}
-	printf("]\n");
-
-}
-
-void run(PROG_LIST l){
-	char* label;
-	PROG_LIST lista;
-	int value;
-	//células que contêm valores de x e respetivo value (se existir)
-	//C1 = lookup(x) C1 vai ter a célula de x
-	//C1->elem delvolve valor de x (se existir)
-	PROG_CELL C1; 
-	PROG_CELL C2;
+int getIndex(char* s, PROG_LIST lista){
+	Instr instruc;
 	while(lista != NULL){
-		Instr inst = head(lista);
-		switch(inst.op){
-			case START:
-				break;
-			case QUIT:
-				return 0;
-				break;
-			case PRINT:
-				printInstruc(inst);
-				break;		
-			case READ:
-				printf("Valor de %s = ", getName(inst.first));
-				scanf("%d\n", &val);
-				insert(getName(inst.first),val);
-				break;
-			case GOTO: //not done
-				label = getName(instfirst);
-				break;
-			case ATRIB:
-				if (inst.second.kind == INT_CONST) {
-					insert(getName(inst.first),getValue(inst.second));
-				} else if (inst.second.kind == STRING) {
-					insert(inst.first,inst.second); 
-				}
-					break;
-			case ADD: //switch tipo!!
-				if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-					printf("%d\n",( getValue(inst.second) + getValue(inst.third) ));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.second));
-					C2 = lookup(getName(inst.third));
-					printf("%d\n",( getValofCell(C1) + getValofCell(C2))); 
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-					C1 = lookup(getName(inst.second));
-					printf("%d\n", ( getValofCell(C1) +  getValue(inst.third)));
-					break;
-				}
-				if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.third));
-					printf("%d\n", ( getValofCell(C1) +  getValue(inst.second)));
-					break;
-				}
-					break;
-			case SUB:
-				if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-					printf("%d\n",( getValue(inst.second) - getValue(inst.third) ));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.second));
-					C2 = lookup(getName(inst.third));
-					printf("%d\n",( getValofCell(C1) - getValofCell(C2)));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-					C1 = lookup(getName(inst.second));
-					printf("%d\n", ( getValofCell(C1) -  getValue(inst.third)));
-					break;
-				}
-				if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.third));
-					printf("%d\n", ( getValofCell(C1) -  getValue(inst.second)));
-					break;
-				}
-					break;
-			case MUL:
-				if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-					printf("%d\n",( getValue(inst.second) * getValue(inst.third) ));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.second));
-					C2 = lookup(getName(inst.third));
-					printf("%d\n",( getValofCell(C1) * getValofCell(C2)));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-					C1 = lookup(getName(inst.second));
-					printf("%d\n", ( getValofCell(C1) *  getValue(inst.third)));
-					break;
-				}
-				if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.third));
-					printf("%d\n", ( getValofCell(C1) *  getValue(inst.second)));
-					break;
-				}
-					break;
-			case DIV:
-				if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
-					printf("%d\n",( getValue(inst.second) / getValue(inst.third) ));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.second));
-					C2 = lookup(getName(inst.third));
-					printf("%d\n",( getValofCell(C1) / getValofCell(C2)));
-					break;
-				}
-				if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
-					C1 = lookup(getName(inst.second));
-					printf("%d\n", ( getValofCell(C1) /  getValue(inst.third)));
-					break;
-				}
-				if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
-					C1 = lookup(getName(inst.third));
-					printf("%d\n", ( getValofCell(C1) /  getValue(inst.second)));
-					break;
-				}
-			default: 
-				printf("Erro!!\n");
+		instruc = head(lista);
+		if(instruc.op == LABEL){
+			if(strcmp(s,getName(instruc.first))==0)
+				return instruc.indice;
 		}
-		lista = lista -> tail;
+		lista = lista->next;
 	}
+	return 0;
 }
 /*******************LIST**********************/
 
@@ -318,12 +141,14 @@ Elem empty(){
 	return new;
 }
 
-Instr mkInstr(OpKind oper, Elem x, Elem y, Elem z){
+Instr mkInstr(OpKind oper, Elem x, Elem y, Elem z, int tipo, int indice){
 	Instr new;
 	new.op = oper;
 	new.first = x;
 	new.second = y;
 	new.third = z;
+	new.tipo = tipo;
+	new.indice = indice;
 	return new;
 }
 
@@ -349,12 +174,13 @@ void printInstruc(Instr instruc){
 }
 
 void removeSpaces(char* str){
-	str[strln(str)-2] = '\0';
+	str[strlen(str)-2] = '\0';
 	int count = 0, i;
-	for(i=0, str[i]; i++)
+	for(i=0; str[i]; i++)
 		if(str[i] != ' ')
 			str[count++] = str[i];
 	str[count] = '\0';	
+	//printf("%s\n",str);
 }
 
 //Saber o tipo de instruções
@@ -365,7 +191,7 @@ void removeSpaces(char* str){
 //Tipo 4 = int str
 int instrucType(char* str, char* ch){
 	char *save, *string, *var1, *var2, *type1, *type2;
-	int temp1, temp2, type;
+	int temp1, temp2, tipo;
 	
 	string = strdup(str);
 	if(string == NULL)
@@ -374,7 +200,7 @@ int instrucType(char* str, char* ch){
 	save = strsep(&string, "=");
 	save = strsep(&string, "=");
 	type1 = strdup(save);
-	type2 = strup(save);
+	type2 = strdup(save);
 	
 	var1 = strsep(&type1, ch);
 	if((var1[0] >= 0x60 && var1[0] <= 0x7B)){ //detetar str
@@ -383,7 +209,6 @@ int instrucType(char* str, char* ch){
 			tipo = 1;
 			return tipo;
 		}else{ //str int
-			temp2 = atoi(var1);
 			tipo = 3;
 			return tipo;
 		}
@@ -391,10 +216,8 @@ int instrucType(char* str, char* ch){
 	
 	var2 = strsep(&type2, ch);
 	if(!(var2[0] >= 0x60 && var2[0] <= 0x7B)){ //detetar int
-		temp1 = atoi(var2);
 		var2 = strsep(&type2, ch);
 		if(!(var2[0] >= 0x61 && var2[0] <= 0x7A)){ //int int
-			temp2 = atoi(var2);
 			tipo = 2;
 			return tipo;
 		}else{ //int str
@@ -402,113 +225,136 @@ int instrucType(char* str, char* ch){
 			return tipo;
 		}
 	}
+	return 0;
 }
 
-Instr convertToInstruc(char* s){
+Instr convertToInstruc(char* s, int indice){
 	Instr instruc;
+	Elem elem1, elem2, elem3, ch, var, num, label;
+	int index;
 	//QUIT
 	if(strstr(s,"quit") != NULL){
-		instruc = mkInstr(QUIT,empty(),empty(),empty(),0);
+		instruc = mkInstr(QUIT,empty(),empty(),empty(),0,indice);
 		return instruc;
 	}
 	//READ ler(x)
-	if(strstr(s,"ler") != NULL){
+	else if(strstr(s,"ler") != NULL){
 		char* string = strdup(s);
-		char* aux = strsep(&string, "("); //usar outra coisa em vez disto, tipo dropar o resto da string
+		char* aux = strsep(&string, "("); 
 		aux = strsep(&string, ")");
-		Elem ch = mkVar(aux);
-		instruc = mkInstr(READ,ch,empty(),empty(),0);
+		ch = mkVar(aux);
+		instruc = mkInstr(READ,ch,empty(),empty(),0,indice);
 		return instruc;
 	}
 	//PRINT escrever(x)
-	if(strstr(s,"escrever") != NULL){
+	else if(strstr(s,"escrever") != NULL){
 		char* string = strdup(s);
 		char* aux = strsep(&string, "(");
 		aux = strsep(&string, ")");
-		Elem ch = mkVar(aux);
-		instruc = mkInstr(PRINT,ch, empty(),empty(),0);
+		ch = mkVar(aux);
+		instruc = mkInstr(PRINT,ch, empty(),empty(),0,indice);
+		return instruc;
+	}
+	//IF if x goto  L1;
+	else if(strstr(s,"if") != NULL && strstr(s,"goto") != NULL){
+		char* string = strdup(s);
+		char* aux = strsep(&string, "f");
+		aux = strsep(&string, "g");
+		//printf("if: %s\n", aux);
+		ch = mkVar(aux);
+		aux = strsep(&string, "o");
+		aux = strsep(&string, "o");
+		aux = strsep(&string, ";");
+		//printf("if: %s\n", aux);
+		label = mkVar(aux);
+		instruc = mkInstr(IF,ch,label,empty(),0,indice);
 		return instruc;
 	}
 	//GOTO 
-	if(strstr(s,"goto") != NULL){
+	else if(strstr(s,"goto") != NULL){
 		char* string = strdup(s);
-		char* aux = strsep(&string, ":");
-		aux = strsep(&string, ":");
-		Elem ch = mkVar(aux);
-		instruc = mkInstr(GOTO,ch,empty(),empty(),0);
+		char* aux = strsep(&string, "o");
+		aux = strsep(&string, "o");
+		aux = strsep(&string, ";");
+		ch = mkVar(aux);
+		//printf("goto: %s\n", aux);
+		instruc = mkInstr(GOTO,ch,empty(),empty(),0,indice);
 		return instruc;
 	}
 	//LABEL
-	if(strstr(s,"label") != NULL) {
+	else if(strstr(s,"label") != NULL) {
 		char* string = strdup(s);
-		char* aux = strsep(&string, ":");
-		aux = strsep(&string, ":");
-		Elem ch = mkVar(aux);
-		instruc = mkInstr(LABEL,ch,empty(),empty(),0);
+		char* aux = strsep(&string, "e");
+		aux = strsep(&string, "l");
+		aux = strsep(&string, ";");
+		//printf("label: %s\n", aux);
+		ch = mkVar(aux);
+		instruc = mkInstr(LABEL,ch,empty(),empty(),0,indice);
 		return instruc;
 	}
 	//ATRIB x = 2
-	if(strstr(s,"+") == NULL && strstr(s,"-") == NULL && strstr(s,"*") == NULL && strstr(s,"/") == NULL){ //ppdes meter outra condição aqui vá
+	else if(strstr(s,"+") == NULL && strstr(s,"-") == NULL && strstr(s,"*") == NULL && strstr(s,"/") == NULL){ //ppdes meter outra condição aqui vá
 		char* string = strdup(s);
 		char* aux = strsep(&string, "=");
-		Elem var = mkVar(aux);
+		var = mkVar(aux);
 		aux = strsep(&string, ";");
-		Elem num = mkInt(atoi(aux));
-		instruc = mkInstr(ATRIB, var, num, empty(),0);
+		num = mkInt(atoi(aux));
+		instruc = mkInstr(ATRIB, var, num, empty(),0,indice);
 		return instruc;
 	}
 	//ARITMÈTRICAS
 	//ADD
-	if(strstr(s,"+") != NULL){
+	else if(strstr(s,"+") != NULL){
 		int tipo = instrucType(s, "+");
+		//printf("%d %d\n", tipo, indice);
 		char *save, *string, *var;
 		switch(tipo){
 			case 1:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "+");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "+");
-				Elem elem3 = mkVar(var);
-				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo);
+				elem3 = mkVar(var);
+				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 2:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "+");
-				Elem elem2 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "+");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 3:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "+");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "+");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 4:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "+");
-				Elem elem3 = mkInt(atoi(var));
+				elem3 = mkInt(atoi(var));
 				var = strsep(&save, "+");
-				Elem elem2 = mkVar(var);
-				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo);
+				elem2 = mkVar(var);
+				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
 		}
@@ -522,49 +368,49 @@ Instr convertToInstruc(char* s){
 			case 1:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "-");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "-");
-				Elem elem3 = mkVar(var);
-				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo);
+				elem3 = mkVar(var);
+				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 2:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "-");
-				Elem elem2 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "-");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 3:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "-");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "-");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 4:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "-");
-				Elem elem3 = mkInt(atoi(var));
+				elem3 = mkInt(atoi(var));
 				var = strsep(&save, "-");
-				Elem elem2 = mkVar(var);
-				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo);
+				elem2 = mkVar(var);
+				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
 		}
@@ -578,49 +424,49 @@ Instr convertToInstruc(char* s){
 			case 1:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "*");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "*");
-				Elem elem3 = mkVar(var);
-				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo);
+				elem3 = mkVar(var);
+				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 2:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "*");
-				Elem elem2 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "*");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 3:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "*");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "*");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 4:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "*");
-				Elem elem3 = mkInt(atoi(var));
+				elem3 = mkInt(atoi(var));
 				var = strsep(&save, "*");
-				Elem elem2 = mkVar(var);
-				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo);
+				elem2 = mkVar(var);
+				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
 		}
@@ -635,49 +481,49 @@ Instr convertToInstruc(char* s){
 			case 1:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "/");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "/");
-				Elem elem3 = mkVar(var);
-				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo);
+				elem3 = mkVar(var);
+				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 2:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "/");
-				Elem elem2 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "/");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 3:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "/");
-				Elem elem2 = mkVar(var);
+				elem2 = mkVar(var);
 				var = strsep(&save, "/");
-				Elem elem3 = mkInt(atoi(var));
-				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo);
+				elem3 = mkInt(atoi(var));
+				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;
 			case 4:
 				string = strdup(s);
 				save = strsep(&string, "=");
-				Elem elem1 = mkVar(save);
+				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "/");
-				Elem elem3 = mkInt(atoi(var));
+				elem3 = mkInt(atoi(var));
 				var = strsep(&save, "/");
-				Elem elem2 = mkVar(var);
-				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo);
+				elem2 = mkVar(var);
+				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
 		}
@@ -688,7 +534,7 @@ Instr convertToInstruc(char* s){
 
 }
 
-void escreverDEBBUG(Instr inst) {
+void escrever(Instr inst) {
   switch (inst.op) {
     case ATRIB:
     if (inst.second.kind == INT_CONST) {
@@ -752,6 +598,24 @@ void escreverDEBBUG(Instr inst) {
       break;
     }
     break;
+    case DIV:
+    if (inst.second.kind == INT_CONST && inst.third.kind == INT_CONST) {
+      printf("%s = %d / %d\n", getName(inst.first), getValue(inst.second), getValue(inst.third));
+      break;
+    }
+    if (inst.second.kind == STRING && inst.third.kind == STRING) {
+      printf("%s = %s / %s\n", getName(inst.first), getName(inst.second), getName(inst.third));
+      break;
+    }
+    if (inst.second.kind == STRING && inst.third.kind == INT_CONST) {
+      printf("%s = %s / %d\n", getName(inst.first), getName(inst.second), getValue(inst.third));
+      break;
+    }
+    if (inst.second.kind == INT_CONST && inst.third.kind == STRING) {
+      printf("%s = %d / %s\n", getName(inst.first), getValue(inst.second), getName(inst.third));
+      break;
+    }
+    break;
     case READ:
     printf("Ler(%s)\n", getName(inst.first));
     break;
@@ -766,10 +630,172 @@ void escreverDEBBUG(Instr inst) {
     case GOTO:
     printf("Goto %s\n", getName(inst.first));
     break;
+    case IF:
+    printf("If %s goto L1\n", getName(inst.first));
+    break;
     case LABEL:
     printf("Label %s\n", getName(inst.first));    
     break;
     default: 
 		printf("Erro!!\n");
   }
+}
+
+int run(PROG_LIST lista){
+	char*label;
+	PROG_CELL cell;
+	int value, part1, part2;
+	PROG_CELL C1; 
+	PROG_CELL C2;
+	Instr aux;
+	int index;
+	while(lista != NULL){
+		Instr inst = head(lista);
+		printf("%d", inst.tipo);
+		switch(inst.op){
+			case START:
+				break;
+			case QUIT:
+				return 0;
+				printf("\nFIM\n");
+				lista->next = NULL;
+				break;
+			case PRINT:
+				printInstruc(inst);
+				break;		
+			case READ:
+				printf("Valor de %s = ", getName(inst.first));
+				scanf("%d", &value);
+				insert(getName(inst.first),value);
+				printf("ok");
+				break;
+			case IF:
+				C1 = lookup(getName(inst.first));
+				printf("waaaa");
+				value = getValofCell(C1);
+				if(value != 0){
+					printf("what");
+					label = getName(inst.second);
+					int index1 = inst.indice;
+					int index2 = getIndex(label,lista);
+					lista = lista -> next;
+					aux = head(lista);
+					while(index != aux.indice){
+						lista = lista -> next;
+						aux = head(lista);
+					}					
+				}
+				break;
+			case GOTO: //not done
+				label = getName(inst.first);
+				index = getIndex(label,lista);
+				lista = lista->next;
+				aux = head(lista);
+				while(index != aux.indice){
+					lista = lista -> next;
+					aux = head(lista);
+				}
+				break;
+			case LABEL: //do more
+				break;
+			case ATRIB:
+				if (inst.second.kind == INT_CONST) {
+					insert(getName(inst.first),getValue(inst.second));
+				} else if (inst.second.kind == STRING) {
+					insert(getName(inst.second),lookup(inst.first.content.name)->elem); 
+				}
+					break;
+			case ADD:
+				switch (inst.tipo) {
+					case 1:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part1 + part2));
+						break;
+				    case 2:
+						insert(getName(inst.first), (getValue(inst.second) + getValue(inst.third)));
+						break;
+					case 3:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						insert(getName(inst.first), (part1 + getValue(inst.third)));
+						break;
+					case 4:
+						printf("suuuum");
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part2 + getValue(inst.second)));
+						break;
+				}
+				break;
+			case SUB:
+				switch (inst.tipo) {
+					case 1:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part1 - part2));
+						break;
+					case 2:
+						insert(getName(inst.first), (getValue(inst.second) - getValue(inst.third)));
+						break;
+					case 3:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						insert(getName(inst.first), (part1 - getValue(inst.third)));
+						break;
+					case 4:
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part2 - getValue(inst.second)));
+						break;
+				}
+				break;
+			case MUL:
+				switch (inst.tipo) {
+					case 1:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part1 * part2));
+						break;
+					case 2:
+						insert(getName(inst.first), (getValue(inst.second) * getValue(inst.third)));
+						break;
+					case 3:
+						part1 = getValofCell(lookup(getName(inst.second)));
+						insert(getName(inst.first), (part1 * getValue(inst.third)));
+						break;
+					case 4:
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part2 * getValue(inst.second)));
+						break;
+				}
+				break;
+			case DIV:
+				switch (inst.tipo) {
+					case 1:
+					printf("oooooo");
+						part1 = getValofCell(lookup(getName(inst.second)));
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part1 / part2));
+						break;
+					case 2:
+					printf("oooooo");
+						insert(getName(inst.first), (getValue(inst.second) / getValue(inst.third)));
+						break;
+					case 3:
+					printf("oooooo");
+						part1 = getValofCell(lookup(getName(inst.second)));
+						printf("oooooo");
+						insert(getName(inst.first), (part1 / getValue(inst.third)));
+						break;
+					case 4:
+					printf("oooooo");
+						part2 = getValofCell(lookup(getName(inst.third)));
+						insert(getName(inst.first), (part2 / getValue(inst.second)));
+						break;
+				}
+				break;
+			default: 
+				printf("Erro!!\n");
+				break;
+		}
+		printf("yee");
+		lista = lista -> next;
+	}
 }
