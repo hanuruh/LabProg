@@ -31,13 +31,13 @@ PROG_CELL lookup(char *s){
   return NULL;
 }
 
-//inserir o valor de eg. x = INT_CONST
+
 void insert(char *s, int value){
 	printf("Insert");
 	int index;
 	index = hash(s);
 	PROG_CELL p;
-	p=(PROG_CELL)malloc(sizeof(struct hash));
+	p=(PROG_CELL)malloc(sizeof(struct list));
 	p->chave= s;
 	p->elem = value;
 	p->next = table[index];	
@@ -153,14 +153,11 @@ Instr mkInstr(OpKind oper, Elem x, Elem y, Elem z, int tipo, int indice){
 }
 
 int getValue(Elem x){
-	if(x.kind = INT_CONST)
 		return x.content.val;
 }
 
 char* getName(Elem x){
-  if (x.kind == STRING) {
     return x.content.name;
-  }
 }
 
 void printInstruc(Instr instruc){
@@ -351,9 +348,9 @@ Instr convertToInstruc(char* s, int indice){
 				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "+");
-				elem3 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "+");
-				elem2 = mkVar(var);
+				elem3 = mkVar(var);
 				instruc = mkInstr(ADD,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
@@ -407,9 +404,9 @@ Instr convertToInstruc(char* s, int indice){
 				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "-");
-				elem3 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "-");
-				elem2 = mkVar(var);
+				elem3 = mkVar(var);
 				instruc = mkInstr(SUB,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
@@ -463,9 +460,9 @@ Instr convertToInstruc(char* s, int indice){
 				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "*");
-				elem3 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "*");
-				elem2 = mkVar(var);
+				elem3 = mkVar(var);
 				instruc = mkInstr(MUL,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
@@ -520,9 +517,9 @@ Instr convertToInstruc(char* s, int indice){
 				elem1 = mkVar(save);
 				save = strsep(&string, "=");
 				var = strsep(&save, "/");
-				elem3 = mkInt(atoi(var));
+				elem2 = mkInt(atoi(var));
 				var = strsep(&save, "/");
-				elem2 = mkVar(var);
+				elem3 = mkVar(var);
 				instruc = mkInstr(DIV,elem1,elem2,elem3,tipo,indice);
 				return instruc;
 				break;			
@@ -651,7 +648,7 @@ int run(PROG_LIST lista){
 	int index;
 	while(lista != NULL){
 		Instr inst = head(lista);
-		printf("%d", inst.tipo);
+		//printf("%d", inst.tipo);
 		switch(inst.op){
 			case START:
 				break;
@@ -795,7 +792,7 @@ int run(PROG_LIST lista){
 				printf("Erro!!\n");
 				break;
 		}
-		printf("yee");
+		//printf("yee");
 		lista = lista -> next;
 	}
 }
