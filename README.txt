@@ -1,9 +1,26 @@
-Programa quase completo.
-Por algum motivo ou uma mudança que foi feita provavelmente na hashtable recebo sempre erro de segmentation fault.
+Programar "Intrepretador" que executa instruções de um ficheiro de texto.
+
+As variáveis "var" são do tipo Int ou String/Char.
+
+Leitura: ler(var);
+
+Escrita: escrever(var);
+
+Atribuição: var = número;
+
+Aritmétricas:
+Soma: "var = var + var;"
+Subtração: "var = var - var;"
+Multiplicação: "var = var * var;"
+Divisao: "var = var / var;"
+If: "if var goto Label";
+Goto: "goto Label"
+Label: "label Label" 
+Terminar o programa: "quit;"
 
 Não é sensivel a espaçamento. O programa acaba com uma instrução "quit;" ou quando não existe mais instruções.
 
-Feito para funcionar com o seguinta exemplo:
+Feito para funcionar com o seguinte exemplo:
 ler(k);
 p= 6 + k;
 if p goto L1;
