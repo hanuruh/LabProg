@@ -33,7 +33,7 @@ PROG_CELL lookup(char *s){
 
 
 void insert(char *s, int value){
-	printf("Insert");
+	//printf("Insert");
 	int index;
 	index = hash(s);
 	PROG_CELL p;
@@ -158,16 +158,6 @@ int getValue(Elem x){
 
 char* getName(Elem x){
     return x.content.name;
-}
-
-void printInstruc(Instr instruc){
-	switch(instruc.first.kind){
-		case INT_CONST:
-			printf("%d\n", getValue(instruc.first)); break;
-		case STRING:
-			printf("%s\n", getName(instruc.first)); break;
-		default: printf("Erro de Impressão\n");
-	}	
 }
 
 void removeSpaces(char* str){
@@ -658,26 +648,27 @@ int run(PROG_LIST lista){
 				lista->next = NULL;
 				break;
 			case PRINT:
-				printInstruc(inst);
+				value = getValofCell(lookup(getName(inst.first)));
+				printf("%d\n", value);
 				break;		
 			case READ:
 				printf("Valor de %s = ", getName(inst.first));
 				scanf("%d", &value);
 				insert(getName(inst.first),value);
-				printf("ok");
+				//printf("ok");
 				break;
 			case IF:
 				C1 = lookup(getName(inst.first));
-				printf("waaaa");
+				//printf("waaaa");
 				value = getValofCell(C1);
 				if(value != 0){
-					printf("what");
+					//printf("what");
 					label = getName(inst.second);
 					int index1 = inst.indice;
 					int index2 = getIndex(label,lista);
 					lista = lista -> next;
 					aux = head(lista);
-					while(index != aux.indice){
+					while(index2 != aux.indice){
 						lista = lista -> next;
 						aux = head(lista);
 					}					
@@ -717,7 +708,7 @@ int run(PROG_LIST lista){
 						insert(getName(inst.first), (part1 + getValue(inst.third)));
 						break;
 					case 4:
-						printf("suuuum");
+						//printf("suuuum");
 						part2 = getValofCell(lookup(getName(inst.third)));
 						insert(getName(inst.first), (part2 + getValue(inst.second)));
 						break;
@@ -766,23 +757,23 @@ int run(PROG_LIST lista){
 			case DIV:
 				switch (inst.tipo) {
 					case 1:
-					printf("oooooo");
+					//printf("oooooo");
 						part1 = getValofCell(lookup(getName(inst.second)));
 						part2 = getValofCell(lookup(getName(inst.third)));
 						insert(getName(inst.first), (part1 / part2));
 						break;
 					case 2:
-					printf("oooooo");
+					//printf("oooooo");
 						insert(getName(inst.first), (getValue(inst.second) / getValue(inst.third)));
 						break;
 					case 3:
-					printf("oooooo");
+					//printf("oooooo");
 						part1 = getValofCell(lookup(getName(inst.second)));
-						printf("oooooo");
+						//printf("oooooo");
 						insert(getName(inst.first), (part1 / getValue(inst.third)));
 						break;
 					case 4:
-					printf("oooooo");
+					//printf("oooooo");
 						part2 = getValofCell(lookup(getName(inst.third)));
 						insert(getName(inst.first), (part2 / getValue(inst.second)));
 						break;
