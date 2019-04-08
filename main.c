@@ -2,29 +2,33 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char **argv){
+    init_table();
     FILE * fp;
-    
-	init_table();
-    char* line = NULL;
-    size_t line_length = 32;
+    char line[1024];
+    char c;
+    size_t line_length = 1024;
     ssize_t read;
+    int indexx = 1, i=0;
     
     fp = fopen(argv[1], "r");
-    if (fp == NULL)
-        exit(EXIT_FAILURE); // see more
-
-    PROG_LIST lista = mkList(mkInstr(START,empty(),empty(),empty()),NULL); // x
-    while (( read = getline(&line, &line_length, fp)) != -1){
-		//printf("Linha = %s\n", linha);
-		removeSpaces(linha);
-		//printf("%s\n", linha);
-		Instr instruc = convertToInstruc(linha);
-		PROG_LIST newInstruc = mkList(instruc,NULL);
-		lista = append(lista, newInstruc);
+    if (fp == NULL){
+        printf("ERRO ABRIR FICHEIRO\n");        
+		return 0;
+	} 
+	
+    PROG_LIST lista = newList(mkInstr(START,empty(),empty(),empty(),0,0),NULL);
+    while ((fgets(line, sizeof(line), fp))!=NULL){
+			//printf("Linha = %s\n", line);
+			removeSpaces(line);
+			//printf("%s\n", line);
+			Instr instruc = convertToInstruc(line,indexx);
+			indexx++;
+			lista = addLast(instruc, lista);
 	}
+	
 	
 	fclose(fp);
 	printf("Lista:\n");
