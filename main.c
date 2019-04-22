@@ -29,12 +29,13 @@ int main(int argc, char **argv){
 			removeSpaces(line);
 			//printf("%s\n", line);
 			Instr instruc = convertToInstruc(line,indexx);
+			/*
 			if(inst.op == LABEL){
 				lista = addLast(instruc, lista);
 				union hash new_label;
 				new_label.label = last(lista);	
 				
-			}
+			}*/
 			indexx++;
 			lista = addLast(instruc, lista);
 			
