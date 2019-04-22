@@ -30,7 +30,7 @@ typedef struct{
 Elem mkVar(char *s);
 Elem mkInt(int n);
 Elem empty();
-Instr mkInstr(OpKind op, Elem x, Elem y, Elem z, int a, int b); //exemplo k = (mkInstr(ADD,mkVar("x"),mkVar("y"),mkInt(2)); y = x + 2 . k vai representar e memoria a instrução
+Instr mkInstr(OpKind op, Elem x, Elem y, Elem z, int a, int b); 
 Instr convertToInstruc(char*, int indice);
 int getValue(Elem x);
 int instrucType(char* str, char* ch); 
