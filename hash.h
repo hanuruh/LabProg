@@ -8,12 +8,6 @@
 #define HASH_SIZE 100
 #define MULTIPLIER 31
 
-/*
-union hash {
-  int value;
-  PROG_LIST label;
-};
-* */
 
 typedef struct hash{
 	char *chave;	
