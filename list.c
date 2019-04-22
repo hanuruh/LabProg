@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "list.h"
+#include "hash.h"
 
 PROG_LIST newList(Instr head, PROG_LIST tail_l){
 	PROG_LIST new = malloc(sizeof(struct list));
@@ -69,5 +70,36 @@ PROG_LIST last(PROG_LIST l) {
   }
 
   return l;
+
+}
+
+PROG_LIST file_to_list(char file_name[]){
+	FILE *fp;
+	init_table();
+    char line[1024];
+    char c;
+    size_t line_length = 1024;
+    ssize_t read;
+    int indexx = 1, i=0;
+	
+	fp = fopen(file_name, "r");
+    if (fp == NULL){
+        printf("ERRO ABRIR FICHEIRO\n");        
+		return 0;
+	} 
+	
+    PROG_LIST lista = newList(mkInstr(START,empty(),empty(),empty(),0,0),NULL);
+    while ((fgets(line, sizeof(line), fp))!=NULL){
+			//printf("Linha = %s\n", line);
+			removeSpaces(line);
+			//printf("%s\n", line);
+			Instr instruc = convertToInstruc(line,indexx);
+			indexx++;
+			lista = addLast(instruc, lista);
+			
+	}	
+	fclose(fp);
+	
+	return lista;
 
 }
