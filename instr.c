@@ -122,8 +122,12 @@ Instr convertToInstruc(char* s, int indice){
 		char* string = strdup(s);
 		char* aux = strsep(&string, "(");
 		aux = strsep(&string, ")");
-		ch = mkVar(aux);
-		instruc = mkInstr(PRINT,ch, empty(),empty(),0,indice);
+		if(atoi(aux) == 0){
+			ch = mkVar(aux);
+			instruc = mkInstr(PRINT,ch, empty(),empty(),0,indice);
+		}else{
+			instruc = mkInstr(PRINT,mkInt(atoi(aux)), empty(),empty(),0,indice);
+		}
 		return instruc;
 	}
 	//IF if x goto  L1;
@@ -488,10 +492,17 @@ void escrever(Instr inst) {
     }
     break;
     case READ:
-    printf("Ler(%s)\n", getName(inst.first));
+    if(getName(inst.first) != NULL)
+		printf("Ler(%s)\n", getName(inst.first));
+	else 
+		printf("Ler(%d)\n", getValue(inst.first));
     break;
     case PRINT:
-    printf("Escrever(%s)\n",getName(inst.first));
+    if(getName(inst.first) != NULL)
+		printf("Escrever(%s)\n", getName(inst.first));
+	else 
+		printf("Escrever(%d)\n", getValue(inst.first));
+    break;
     break;
     case START:
     break;
