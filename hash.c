@@ -29,7 +29,6 @@ PROG_CELL lookup(char *s){
   return NULL;
 }
 
-
 void insert(char *s, int value){
 	int index;
 	index = hash(s);
