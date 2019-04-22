@@ -1,24 +1,26 @@
 Programar "Intrepretador" que executa instruções de um ficheiro de texto.
 
-As variáveis "var" são do tipo Int ou String/Char.
+As variáveis "var" são do tipo Int ou Char.
 
 Leitura: ler(var);
 
 Escrita: escrever(var);
 
-Atribuição: var = número;
+Atribuição: var = número; var = character;
 
 Aritmétricas:
 Soma: "var = var + var;"
 Subtração: "var = var - var;"
 Multiplicação: "var = var * var;"
-Divisao: "var = var / var;"
-If: "if var goto Label";
-Goto: "goto Label"
-Label: "label Label" 
+Divisao: "var = var / var;" (sensível a números negativos)
+
+If: "if var goto Label;"
+Goto: "goto Label;"
+Label: "label Label;" 
+
 Terminar o programa: "quit;"
 
-Não é sensivel a espaçamento. O programa acaba com uma instrução "quit;" ou quando não existe mais instruções.
+Sensível a linhas em branco (erro de Segmentation Fault). O programa acaba com uma instrução "quit;" ou quando não existe mais instruções.
 
 Feito para funcionar com o seguinte exemplo:
 ler(k);
