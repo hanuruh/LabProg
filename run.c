@@ -130,17 +130,37 @@ int run(PROG_LIST lista){
 					case 1:
 						part1 = getValofCell(lookup(getName(inst.second)));
 						part2 = getValofCell(lookup(getName(inst.third)));
+						if(part2 == 0){
+							printf("Imposível dividir por 0!!\n");
+							insert(getName(inst.first), 0);
+							break;
+						}
 						insert(getName(inst.first), (part1 / part2));
 						break;
 					case 2:
+						if(getValue(inst.third) == 0){
+							printf("Imposível dividir por 0!!\n");
+							insert(getName(inst.first), 0);
+							break;
+						}
 						insert(getName(inst.first), (getValue(inst.second) / getValue(inst.third)));
 						break;
 					case 3:
 						part1 = getValofCell(lookup(getName(inst.second)));
+						if(getValue(inst.third) == 0){
+							printf("Imposível dividir por 0!!\n");
+							insert(getName(inst.first), 0);
+							break;
+						}
 						insert(getName(inst.first), (part1 / getValue(inst.third)));
 						break;
 					case 4:
 						part2 = getValofCell(lookup(getName(inst.third)));
+						if(getValue(inst.second) == 0){
+							printf("Imposível dividir por 0!!\n");
+							insert(getName(inst.first), 0);
+							break;
+						}
 						insert(getName(inst.first), (part2 / getValue(inst.second)));
 						break;
 				}
